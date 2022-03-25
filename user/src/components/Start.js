@@ -29,6 +29,12 @@ function Start(){
     <Link to={"/reset"}>
 					<button  className="btn btn-primary" >Forgot Password</button>
 		</Link>
+
+    
+    <Link to={"/google"}>
+					<button  className="btn btn-primary" >Google Login</button>
+		</Link>
+
       </>
 
       

@@ -2,6 +2,7 @@ const User = require("../src/models/User_Model");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
+const jwt = require("jsonwebtoken");
 
 require('request-promise-native').defaults({family:4})
 const transporter = nodemailer.createTransport(sendgridTransport({
@@ -10,6 +11,13 @@ const transporter = nodemailer.createTransport(sendgridTransport({
         api_key : "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"
     }
 }))
+
+
+
+
+const {OAuth2Client} = require("google-auth-library");
+const client = new OAuth2Client("289992240405-th8foi52sslkud3odjnpoq8i0bdkcsta.apps.googleusercontent.com");
+
 
 module.exports.Login = async (req, res, next) => {
     try {
@@ -94,10 +102,10 @@ module.exports.Dashboard = async (req, res, next) => {
         res.send("Welcome to secret information");
        
     } catch (err) {
-        console.log(error);
+        console.log(err);
         res.status(500).json({
             sucess: false,
-            message: error.message
+            message: err.message
         })
     }
   };
@@ -215,3 +223,100 @@ module.exports.Dashboard = async (req, res, next) => {
         })
     }
   };
+
+
+
+
+
+  
+module.exports.Google_Login = async (req, res, next) => {
+    try {
+                const {tokenID} = req.body;
+
+                client.verifyIdToken({idToken:tokenID, audience:"289992240405-th8foi52sslkud3odjnpoq8i0bdkcsta.apps.googleusercontent.com"})
+                .then(response =>{
+                    const {email_verified , name , email} = response.payload;
+
+                    if(email_verified){
+                        User.findOne({email}).exec((err,user)=>{
+                            if(err){
+                                
+                                return res.status(401).json({ error: "User is not registered for google login" });
+                            }else{
+                                if(user){
+                                    
+                                    const token = jwt.sign(
+                                    { user_id: user._id, email },
+                                    process.env.SECRETE_KEY,
+                                    {
+                                        expiresIn: "2h",
+                                    }
+                                    );
+                                    user.token = token;
+                                    user.password = undefined;
+                    
+                                    const options = {
+                                    expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+                                    httpOnly: true,
+                                    };
+
+                                    console.log("login done via google ");
+                            
+                                    res.status(200).cookie("token", token, options).json({
+                                    success: true,
+                                    token,
+                                    user,
+                                    msg: "Login success"
+                                    });
+
+
+                                }else{
+
+                                                   
+                                    pass = email+123;
+                                    console.log(pass);
+                                                        
+                                    
+                                    const New_user = User.create({
+                                        
+                                        email: email.toLowerCase() , name , password:pass
+                                    });
+                                    
+                                    
+                                    const token = jwt.sign(
+                                        {user_id : New_user._id , email},
+                                        process.env.SECRETE_KEY ,
+                                        {
+                                            expiresIn : "2h"
+                                        }
+                                    );
+
+                                    New_user.token = token;
+
+                                    
+                                    
+                                    res.status(201).json(New_user);
+
+                                        
+                                        
+
+                                        
+
+                                }
+                            }
+                        })
+                    }
+
+                })
+
+       
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            sucess: false,
+            message: error.message
+        })
+    }
+  };
+
+

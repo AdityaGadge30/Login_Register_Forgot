@@ -8,6 +8,7 @@ import Start from "./components/Start";
 import Dashboard from "./components/Dashboard";
 import Reset from "./components/Reset";
 import Pass_Change from "./components/Pass_Change";
+import Google_Login from "./components/Google_Login";
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
 
           <Route path="/reset" element={<Reset />} />
           <Route path="/reset_pass/:token" element={<Pass_Change />} />
+
+          <Route path="/google" element={<Google_Login />} />
 
       </Routes>
     </Router>
