@@ -8,16 +8,16 @@ require("dotenv").config();
 require('request-promise-native').defaults({family:4})
 const transporter = nodemailer.createTransport(sendgridTransport({
 
+    
     auth : {
         api_key : process.env.Mail_Api
     }
-}))
+}));
 
+const {OAuth2Client} = require("google-auth-library")
 
-
-
-const {OAuth2Client} = require("google-auth-library");
 const client = new OAuth2Client("289992240405-th8foi52sslkud3odjnpoq8i0bdkcsta.apps.googleusercontent.com");
+
 
 
 module.exports.Login = async (req, res, next) => {
