@@ -1,18 +1,20 @@
 const User = require("../src/models/User_Model");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-const sendgridTransport = require("nodemailer-sendgrid-transport");
+
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 require('request-promise-native').defaults({family:4})
-const transporter = nodemailer.createTransport(sendgridTransport({
+const transporter = nodemailer.createTransport({
 
-    
+    service:"gmail",
+  
     auth : {
-        api_key : process.env.Mail_Api
+        user:process.env.Mail ,
+        pass: process.env.pass_mail
     }
-}));
+});
 
 const {OAuth2Client} = require("google-auth-library")
 
@@ -135,13 +137,15 @@ module.exports.Dashboard = async (req, res, next) => {
             try {
                 transporter.sendMail({
                     to:user.email,
-                    from:"ppadi.257@gmail.com",
+                    from:process.env.Mail,
                     subject:"success",
                     html: message 
     
-                })      
+                })    
+                
+                console.log("hii");
                 res.status(200).json({
-                    success:true,
+                    success:true,   
                     message:"mail sended succesfully"
                 })
                 
